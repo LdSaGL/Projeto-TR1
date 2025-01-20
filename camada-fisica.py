@@ -64,15 +64,78 @@ def bipolar_modulation(binary_sequence):
     
     return signal, time
 
+def ask_modulation(A, F, bit_stream, digi_mod):
+    """
+    Realiza modulação ASK (Amplitude Shift Keying) em um stream de bits.
+    :param A: Amplitude da onda portadora.
+    :param F: Frequência da onda portadora.
+    :param bit_stream: Lista ou array representando o stream de bits.
+    :param digi_mod: Tipo de modulação digital.
+    :return: Array representando o sinal modulado ASK.
+    """
+    sig_size = len(bit_stream)
+    signal = np.zeros(sig_size * 100)  # Inicializa o array para o sinal modulado
+    
+    for i in range(sig_size):
+        if digi_mod == 3: # Se for bipolar
+            if bit_stream[i] in (1, -1): # Inclui a tensão -1 V como bit 1 
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F * j / 100)
+            else:
+                for j in range(100):
+                    signal[(i * 100) + j] = 0
+        else:
+            if bit_stream[i] == 1:
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F * j / 100)
+            else:
+                for j in range(100):
+                    signal[(i * 100) + j] = 0
+
+    return signal
+
+def fsk_modulation(A, F1, F2, bit_stream, digi_mod):
+    """
+    Realiza modulação FSK (Frequency Shift Keying) em um stream de bits.
+    :param A: Amplitude da onda portadora.
+    :param F1: Frequência da onda portadora para o valor de tensão do bit 1.
+    :param F2: Frequência da onda portadora para o valor de tensão do bit 0.
+    :param bit_stream: Lista ou array representando o stream de bits.
+    :param digi_mod: Tipo de modulação digital.
+    :return: Array representando o sinal modulado FSK.
+    """
+    sig_size = len(bit_stream)
+    signal = np.zeros(sig_size * 100)  # Inicializa o array para o sinal modulado
+    
+    for i in range(sig_size):
+        if digi_mod == 3: # Se for bipolar
+            if bit_stream[i] in (1, -1): # Inclui a tensão -1 V como bit 1 
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F1 * j / 100)
+            else:
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F2 * j / 100)
+        else:
+            if bit_stream[i] == 1:
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F1 * j / 100)
+            else:
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F2 * j / 100)
+
+    return signal
+    
 def main():
     # Entrada de dados do usuário
     user_input = input("Digite a sequência binária: ")
-    print("Tipos de modulação disponíveis:")
+    
+    # Seleção da modulação digital
+    print("Tipos de modulação digital disponíveis:")
     print("1 - NRZ-Polar")
     print("2 - Manchester")
     print("3 - Bipolar")
-    modulation_selected = input("Digite o número da modulação desejada: ")
-    modulation_name = ""
+    digital_modulation_selected = input("Digite o número da modulação digital desejada: ")
+    digital_modulation_name = ""
     
     # Validação da entrada
     if not set(user_input).issubset({'0', '1'}):
@@ -82,16 +145,35 @@ def main():
     # Converter a sequência de entrada para uma lista de inteiros
     binary_sequence = [int(bit) for bit in user_input]
     
-    # Modulação selecionada
-    if modulation_selected == "1":
+    # Modulação digital selecionada
+    if digital_modulation_selected == "1":
         signal, time = nrz_polar_modulation(binary_sequence)
-        modulation_name = "NRZ-Polar"
-    elif modulation_selected == "2":
+        digital_modulation_name = "NRZ-Polar"
+    elif digital_modulation_selected == "2":
         signal, time = manchester_modulation(binary_sequence)
-        modulation_name = "Manchester"
-    elif modulation_selected == "3":
+        digital_modulation_name = "Manchester"
+    elif digital_modulation_selected == "3":
         signal, time = bipolar_modulation(binary_sequence)
-        modulation_name = "Bipolar"
+        digital_modulation_name = "Bipolar"
+    else:
+        print("Modulação inválida!")
+        return
+    
+    # Seleção da modulação analógica
+    print("Tipos de modulação analógica disponíveis:")
+    print("1 - ASK")
+    print("2 - FSK")
+    print("3 - 8QAM")
+    analogical_modulation_selected = input("Digite o número da modulação analógica desejada: ")
+    analogical_modulation_name = ""
+    
+    # Modulação analógica selecionada
+    if analogical_modulation_selected == "1":
+        signal2 = ask_modulation(1, 1, signal, int(digital_modulation_selected))
+        analogical_modulation_name = "ASK"
+    elif analogical_modulation_selected == "2":
+        signal2 = fsk_modulation(1, 1, 3, signal, int(digital_modulation_selected))
+        analogical_modulation_name = "FSK"
     else:
         print("Modulação inválida!")
         return
@@ -104,15 +186,27 @@ def main():
     time_extended = np.append(time, time[-1] + (time[1] - time[0]))
     signal_extended = np.append(signal, signal[-1])
     
-    # Plotar o sinal modulado
+    # Plotar o sinal digital modulado
     plt.figure(figsize=(10, 4))
     plt.plot(time_extended, signal_extended, drawstyle='steps-post', label="Sinal")
-    plt.title(f"Modulação {modulation_name}")
+    plt.title(f"Modulação {digital_modulation_name}")
     plt.xlabel("Tempo")
     plt.ylabel("Amplitude")
     plt.grid(True)
     plt.legend()
-    plt.savefig(f"sinal_{modulation_name}.png")
-
+    #plt.savefig(f"sinal_{modulation_name}.png")
+    plt.show()
+    
+    print(signal2)
+    # Plotar o sinal analogico modulado
+    plt.figure(figsize=(12, 4))
+    plt.plot(signal2)
+    plt.title(f"Sinal {analogical_modulation_name} Modulado")
+    plt.xlabel("Amostras")
+    plt.ylabel("Amplitude")
+    plt.grid(True)
+    plt.show()
+    
+    
 if __name__ == "__main__":
     main()
