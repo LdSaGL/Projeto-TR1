@@ -168,61 +168,18 @@ def qam8_modulation(A, F, bit_stream):
     
     return signal
     
-def main():
-    # Entrada de dados do usuário
-    user_input = input("Digite a sequência binária: ")
+def main(digital_modulation_selected, analogical_modulation_selected, binary_output):
     
-    # Seleção da modulação digital
-    print("Tipos de modulação digital disponíveis:")
-    print("1 - NRZ-Polar")
-    print("2 - Manchester")
-    print("3 - Bipolar")
-    digital_modulation_selected = input("Digite o número da modulação digital desejada: ")
-    digital_modulation_name = ""
+    binary_sequence = []
+    for bit in binary_output:
+        binary_sequence.append(int(bit))
     
-    # Validação da entrada
-    if not set(user_input).issubset({'0', '1'}):
-        print("Entrada inválida! Certifique-se de digitar apenas 0s e 1s.")
-        return
-    
-    # Converter a sequência de entrada para uma lista de inteiros
-    binary_sequence = [int(bit) for bit in user_input]
-    
-    # Modulação digital selecionada
-    if digital_modulation_selected == "1":
-        signal, time = nrz_polar_modulation(binary_sequence)
-        digital_modulation_name = "NRZ-Polar"
-    elif digital_modulation_selected == "2":
+    if digital_modulation_selected == "NRZ-Polar":
+        signal,time = nrz_polar_modulation(binary_sequence) 
+    elif digital_modulation_selected == "Manchester":
         signal, time = manchester_modulation(binary_sequence)
-        digital_modulation_name = "Manchester"
-    elif digital_modulation_selected == "3":
+    elif digital_modulation_selected == "Bipolar":
         signal, time = bipolar_modulation(binary_sequence)
-        digital_modulation_name = "Bipolar"
-    else:
-        print("Modulação inválida!")
-        return
-    
-    # Seleção da modulação analógica
-    print("Tipos de modulação analógica disponíveis:")
-    print("1 - ASK")
-    print("2 - FSK")
-    print("3 - 8QAM")
-    analogical_modulation_selected = input("Digite o número da modulação analógica desejada: ")
-    analogical_modulation_name = ""
-    
-    # Modulação analógica selecionada
-    if analogical_modulation_selected == "1":
-        signal2 = ask_modulation(1, 1, signal, int(digital_modulation_selected))
-        analogical_modulation_name = "ASK"
-    elif analogical_modulation_selected == "2":
-        signal2 = fsk_modulation(1, 1, 3, signal, int(digital_modulation_selected))
-        analogical_modulation_name = "FSK"
-    elif analogical_modulation_selected == "3":
-        signal2 = qam8_modulation(1, 1, signal)
-        analogical_modulation_name = "8QAM"
-    else:
-        print("Modulação inválida!")
-        return
     
     # Correção do eixo x para plotagem
     time_extended = np.append(time, time[-1] + (time[1] - time[0]))
@@ -231,23 +188,26 @@ def main():
     # Plotar o sinal digital modulado
     plt.figure(figsize=(10, 4))
     plt.plot(time_extended, signal_extended, drawstyle='steps-post', label="Sinal")
-    plt.title(f"Modulação {digital_modulation_name}")
+    plt.title(f"Modulação {digital_modulation_selected}")
     plt.xlabel("Tempo")
     plt.ylabel("Amplitude")
     plt.grid(True)
     plt.legend()
     #plt.savefig(f"sinal_{modulation_name}.png")
     plt.show()
+       
+    if analogical_modulation_selected == "ASK":
+        signal2 = ask_modulation(1, 1, binary_sequence, 1)
+    elif analogical_modulation_selected == "FSK":
+        signal2 = fsk_modulation(1, 1, 3, binary_sequence, 1)
+    elif analogical_modulation_selected == "8-QAM":
+        signal2 = qam8_modulation(1, 1, binary_sequence)
     
     # Plotar o sinal analógico modulado
     plt.figure(figsize=(12, 4))
     plt.plot(signal2)
-    plt.title(f"Sinal {analogical_modulation_name} Modulado")
+    plt.title(f"Sinal {analogical_modulation_selected} Modulado")
     plt.xlabel("Amostras")
     plt.ylabel("Amplitude")
     plt.grid(True)
     plt.show()
-    
-    
-if __name__ == "__main__":
-    main()
