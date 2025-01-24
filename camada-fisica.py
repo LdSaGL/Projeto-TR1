@@ -124,6 +124,49 @@ def fsk_modulation(A, F1, F2, bit_stream, digi_mod):
                     signal[(i * 100) + j] = A * np.sin(2 * np.pi * F2 * j / 100)
 
     return signal
+
+def qam8_modulation(A, F, bit_stream):
+    """
+    Realiza modulação 8-QAM (Quadrature Amplitude Modulation com 8 estados) em um stream de bits.
+    :param A: Amplitude base da onda portadora.
+    :param F: Frequência da onda portadora.
+    :param bit_stream: Lista ou array representando o stream de bits (deve ter múltiplos de 3).
+    :return: Array representando o sinal modulado 8-QAM.
+    """
+    if len(bit_stream) % 3 != 0:
+        raise ValueError("O bit_stream deve ter tamanho múltiplo de 3 para 8-QAM.")
+
+    sig_size = len(bit_stream) // 3  # Cada símbolo 8-QAM representa 3 bits
+    signal = np.zeros(sig_size * 100)  # Inicializa o array para o sinal modulado
+    t = np.linspace(0, 1, 100, endpoint=False)  # Intervalo de tempo para um símbolo
+    
+    # Constelação 8-QAM (amplitude e fase para cada combinação de bits)
+    constellation = {
+        (0, 0, 0): (A / 2, 0),
+        (0, 0, 1): (A / 2, np.pi / 4),
+        (0, 1, 0): (A / 2, np.pi / 2),
+        (0, 1, 1): (A / 2, 3 * np.pi / 4),
+        (1, 0, 0): (A, 0),
+        (1, 0, 1): (A, np.pi / 4),
+        (1, 1, 0): (A, np.pi / 2),
+        (1, 1, 1): (A, 3 * np.pi / 4),
+    }
+
+    for i in range(sig_size):
+        # Extrair os 3 bits que formam o símbolo
+        bits = tuple(bit_stream[i * 3:(i + 1) * 3])
+        if bits not in constellation:
+            raise ValueError(f"Bits inválidos na constelação: {bits}")
+        
+        # Obter amplitude e fase do símbolo na constelação
+        amp, phase = constellation[bits]
+        
+        # Gerar o sinal para o símbolo atual
+        for j in range(100):
+            signal[(i * 100) + j] = amp * np.sin(2 * np.pi * F * t[j] + phase)
+
+    
+    return signal
     
 def main():
     # Entrada de dados do usuário
@@ -174,13 +217,12 @@ def main():
     elif analogical_modulation_selected == "2":
         signal2 = fsk_modulation(1, 1, 3, signal, int(digital_modulation_selected))
         analogical_modulation_name = "FSK"
+    elif analogical_modulation_selected == "3":
+        signal2 = qam8_modulation(1, 1, signal)
+        analogical_modulation_name = "8QAM"
     else:
         print("Modulação inválida!")
         return
-    
-    # Exibir no terminal
-    print("Sinal modulado:", signal)
-    print("Eixo do tempo:", time)
     
     # Correção do eixo x para plotagem
     time_extended = np.append(time, time[-1] + (time[1] - time[0]))
@@ -197,8 +239,7 @@ def main():
     #plt.savefig(f"sinal_{modulation_name}.png")
     plt.show()
     
-    print(signal2)
-    # Plotar o sinal analogico modulado
+    # Plotar o sinal analógico modulado
     plt.figure(figsize=(12, 4))
     plt.plot(signal2)
     plt.title(f"Sinal {analogical_modulation_name} Modulado")
