@@ -1,4 +1,14 @@
+import binascii
 import camada_enlace as ce
+
+def text_from_bits(bits, encoding='utf-8', errors='surrogatepass'):
+    n = int(bits, 2)
+    return int2bytes(n).decode(encoding, errors)
+
+def int2bytes(i):
+    hex_string = '%x' % i
+    n = len(hex_string)
+    return binascii.unhexlify(hex_string.zfill(n + (n & 1)))
 
 def decode_hamming(binary_sequence):
     grouped_bytes = [binary_sequence[i:i + 12] for i in range(0, len(binary_sequence), 12)]
@@ -46,6 +56,44 @@ def decode_parity_bit(binary_sequence):
         
     return binary_sequence[:-1]
 
-x = ce.parity_bit([0,1,0,0,1,0,0,0])
-print(x)
-print(decode_parity_bit([0,1,0,0,1,0,0,0]))
+def decode_char_insertion(binary_sequence):
+    # Declaração da Flag
+    flag = [0,1,1,1,1,1,1,0]
+    trimmed_sequence = binary_sequence[8:-8]
+    
+    flag_inserted_char = [0,1,1,1,1,1,0,1,0]
+    for bit in range(len(trimmed_sequence)):
+        if trimmed_sequence[bit:bit+9] == flag_inserted_char:
+            trimmed_sequence = trimmed_sequence[:bit] + flag + trimmed_sequence[bit+9:]
+    return trimmed_sequence
+
+def decode_byte_insertion(binary_sequence): ##
+    # Declaração da Flag
+    flag =   [0,1,1,1,1,1,1,0]
+    escape = [0,1,1,1,1,0,1,1]
+    trimmed_sequence = binary_sequence[8:-8]
+    
+    ignore_next_flag_or_escape = False
+    for i in range(len(trimmed_sequence)):
+        if trimmed_sequence[i:i+8] == escape and not ignore_next_flag_or_escape:
+            ignore_next_flag_or_escape = True
+            trimmed_sequence = trimmed_sequence[:i] + trimmed_sequence[i+8:]
+        else:
+            if trimmed_sequence[i:i+8] == flag or trimmed_sequence[i:i+8] == escape:
+                ignore_next_flag_or_escape = False
+    return trimmed_sequence
+
+def decode_char_count(binary_sequence):
+    first_8_bits = text_from_bits(''.join(map(str,binary_sequence[:8])))
+    second_8_bits = text_from_bits(''.join(map(str,binary_sequence[8:16])))
+    
+    data_sequence = binary_sequence[8:]
+    char_number=first_8_bits
+    if second_8_bits.isdecimal() and len(binary_sequence) > 16:
+        char_number += second_8_bits
+        data_sequence = binary_sequence[16:]
+    
+    if len(data_sequence) != int(char_number):
+        raise Exception("Erro de transmissão detectado")
+        
+    return data_sequence
