@@ -26,26 +26,14 @@ def byte_insertion(binary_sequence):
     :return: Lista de bytes com as inserções de flag e escape realizadas.
     """
     # Declaração da Flag e do Escape padrão
-    flag = [0,1,1,1,1,1,1,0]
-    escape = [0,1,1,1,1,1,0,1]
+    flag =   [0,1,1,1,1,1,1,0]
+    escape = [0,1,1,1,1,0,1,1]
     
-    framed_data = [bit for bit in flag]  # Adiciona o byte de flag inicial
-
-    # Dividir em grupos de 8 bits
-    grouped_bytes = [binary_sequence[i:i+8] for i in range(0, len(binary_sequence), 8)]
-    
-    # Insere o byte de escape quando encontra uma flag ou um escape
-    for byte in grouped_bytes:
-        if byte == flag or byte == escape:  # Verifica se o byte é uma flag ou um escape
-            framed_data.extend(escape) 
-            
-        # Adiciona o byte atual
-        framed_data.extend(byte)    
-             
-    # Adiciona o byte de flag final        
-    framed_data.extend(flag)   
+    for i in range(len(binary_sequence)):
+        if binary_sequence[i:i+8] == flag or binary_sequence[i:i+8] == escape:
+            binary_sequence = binary_sequence[:i] + escape + binary_sequence[i:] 
      
-    return framed_data
+    return flag + binary_sequence + flag
 
 def char_insertion(binary_sequence):
     """
@@ -58,17 +46,15 @@ def char_insertion(binary_sequence):
     flag = [0,1,1,1,1,1,1,0]
     
     framed_data = [bit for bit in flag]  # Adiciona o byte de flag inicial
+    
+    char_insertion = [0,1,1,1,1,1,0,1,0]
 
-    # Dividir em grupos de 8 bits
-    grouped_bytes = [binary_sequence[i:i+8] for i in range(0, len(binary_sequence), 8)]
-
-    # Insere o byte de carga útil que tem o mesmo valor que a flag adicionando um 0 no lugar do sexto 1
-    for byte in grouped_bytes:
-        if byte == flag:  # Verifica se o byte é uma flag
-            framed_data.extend([0, 1, 1, 1, 1, 1, 0, 1, 0]) 
-        else:
-            # Adiciona o byte atual
-            framed_data.extend(byte)
+    for bit in range(len(binary_sequence)):
+        if binary_sequence[bit:bit+8] == flag:
+            binary_sequence = binary_sequence[:bit]+ char_insertion + binary_sequence[bit+8:]
+    
+    framed_data.extend(binary_sequence)
+            
     # Adiciona o byte de flag final    
     framed_data.extend(flag)  
     
