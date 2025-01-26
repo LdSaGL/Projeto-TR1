@@ -200,9 +200,9 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_out
     plt.show()
        
     if analogical_modulation_selected == "ASK":
-        signal2 = ask_modulation(1, 1, signal, 1)
+        signal2 = ask_modulation(1, 1, signal, digital_modulation_selected)
     elif analogical_modulation_selected == "FSK":
-        signal2 = fsk_modulation(1, 1, 3, signal, 1)
+        signal2 = fsk_modulation(1, 1, 3, signal, digital_modulation_selected)
     elif analogical_modulation_selected == "8-QAM":
         signal2 = qam8_modulation(1, 1, signal)
     
