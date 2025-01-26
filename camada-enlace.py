@@ -11,8 +11,6 @@ def char_count(binary_sequence):
     :param binary_sequence: Lista de bits representando a sequência binária.
     :return: Lista de bits com o protocolo de enquadramento contagem de caracteres.
     """
-    if len(binary_sequence) % 8 != 0: # Verifica se os bits estão alinhados corretamente
-        raise ValueError('Os bits não estão alinhados corretamente')
     sequence_size = text_to_bits(str(len(binary_sequence))) # Converte o tamanho da sequência para ASCII representado em binário
     
     # Converte a string de contagem de caracteres a forma de lista 
@@ -69,8 +67,10 @@ def char_insertion(binary_sequence):
         if byte == flag:  # Verifica se o byte é uma flag
             framed_data.extend([0, 1, 1, 1, 1, 1, 0, 1, 0]) 
         else:
-            # Adiciona o byte de flag final    
-            framed_data.extend(flag)  
+            # Adiciona o byte atual
+            framed_data.extend(byte)
+    # Adiciona o byte de flag final    
+    framed_data.extend(flag)  
     
     return framed_data
 
@@ -83,3 +83,57 @@ def parity_bit(binary_sequence):
     # Cálculo do bit de paridade
     binary_sequence.append(sum(binary_sequence) % 2)  # Soma os bits 1 e verifica se é par ou ímpar
     return binary_sequence
+
+def crc(dividendo):
+    """
+    Calcula o CRC usando o polinômio gerador pré-determinado (1101).
+    :param dividendo: lista de bits representando o dividendo.
+    :return: lista de bits resultante que contém o dividendo concatenado ao CRC.
+    """
+    # Polinômio gerador
+    polynomial = [1, 1, 0, 1]
+    
+    # Adicionar zeros ao final do dividendo para o cálculo do CRC
+    crc = dividendo + [0] * (len(polynomial) - 1)
+
+    # Dividir o dividendo pelo polinômio gerador
+    for i in range(len(dividendo)):
+        if crc[i] == 1:  # Se o bit atual do CRC for 1
+            for j in range(len(polynomial)):
+                # Realiza a operação XOR com o polinômio gerador
+                crc[i + j] ^= polynomial[j]
+
+    # Retorna o dividendo concatenado ao CRC (os últimos 3 bits)
+    return dividendo + crc[-(len(polynomial) - 1):]
+
+def hamming(binary_sequence):
+    """
+    Função para cálculo de código de Hamming.
+    :param binary_sequence: Lista de bits representando a sequência binária.
+    :return: Lista de bits com código de Hamming.
+    """
+    # Dividir a sequência em grupos de 8 bits (1 byte)
+    grouped_bytes = [binary_sequence[i:i + 8] for i in range(0, len(binary_sequence), 8)]
+    hamming_sequence = ''
+
+    for byte in grouped_bytes:
+        # Garantir que o byte tenha exatamente 8 bits
+        if len(byte) != 8:
+            hamming_sequence += ''.join(map(str, byte))
+        else:
+            # Conversão dos bits de string para inteiros (caso necessário)
+            byte = list(map(int, byte))
+
+            # Cálculo dos bits de paridade
+            p1 = (byte[0] + byte[1] + byte[3] + byte[4] + byte[6]) % 2
+            p2 = (byte[0] + byte[2] + byte[3] + byte[5] + byte[6]) % 2
+            p4 = (byte[1] + byte[2] + byte[3] + byte[7]) % 2
+            p8 = (byte[4] + byte[5] + byte[6] + byte[7]) % 2
+
+            # Construir o novo byte com os bits de Hamming
+            hamming_byte = [p1, p2, byte[0], p4, byte[1], byte[2], byte[3], p8, byte[4], byte[5], byte[6], byte[7]]
+
+            # Adicionar o byte codificado à sequência final
+            hamming_sequence += ''.join(map(str, hamming_byte))
+
+    return [int(bit) for bit in hamming_sequence]
