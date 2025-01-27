@@ -48,7 +48,7 @@ def decode_crc(binary_sequence):
     resto = dividendo[-(len(polynomial) - 1):]
     
     if resto != [0,0,0]:
-        raise Exception("Erro de transmissão detectado")
+        raise Exception("Erro de transmissão detectado - CRC")
     return binary_sequence[:-3]
 
 def decode_parity_bit(binary_sequence):
@@ -56,7 +56,7 @@ def decode_parity_bit(binary_sequence):
     parity = sum(binary_sequence) % 2 
         
     if parity != 0:
-        raise Exception("Erro de transmissão detectado")
+        raise Exception("Erro de transmissão detectado - Bit de Paridade")
         
     return binary_sequence[:-1]
 
@@ -98,7 +98,7 @@ def decode_char_count(binary_sequence):
         data_sequence = binary_sequence[16:]
     
     if len(data_sequence) != int(char_number):
-        raise Exception("Erro de transmissão detectado")
+        raise Exception("Erro de transmissão detectado - Contagem de Caracteres")
         
     return data_sequence
 
@@ -129,8 +129,3 @@ def main(framing, error_detection, error_correction, binary_sequence):
         binary_sequence = decode_char_insertion(binary_sequence)
     
     return text_from_bits(''.join(map(str,binary_sequence)))
-
-#print(main("Contagem de Caracteres", "Bit de Paridade", "Hamming", [1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1]))
-
-#49
-

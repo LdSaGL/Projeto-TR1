@@ -34,19 +34,10 @@ def main():
     # Função de callback que será chamada ao dar submit na interface
     def handle_submit(digital_mod, analog_mod, framing, error_detection, error_correction, ascii_input):
         
-        message, bin_ascii = ce.main(framing, error_detection, error_correction, ascii_input)
+        message, bin_ascii = ce.main(framing, error_detection, error_correction, ascii_input)  
         quadro = cf.main(digital_mod, analog_mod, message)
         
-        # Realiza a demodulação
-        demodulated_frame = dcf.main(digital_mod, analog_mod, quadro)
-
-        # Realiza a decodificação de enlace
-        final_message = dce.main(framing, error_detection, error_correction, demodulated_frame)
-
-        # Monta a resposta
-        print(final_message)
-        
-        #asyncio.run(enviar_quadro(quadro, digital_mod, analog_mod, framing, error_detection, error_correction))
+        asyncio.run(enviar_quadro(quadro, digital_mod, analog_mod, framing, error_detection, error_correction))
 
         
         return ' '.join(bin_ascii[i:i+8] for i in range(0, len(bin_ascii), 8))

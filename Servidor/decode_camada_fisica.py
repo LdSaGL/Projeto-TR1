@@ -125,9 +125,9 @@ def demodulate_manchester(binary_sequence):
     for i in range(0, len(binary_sequence), 2):
         # Detectar a transição no meio do bit
         if binary_sequence[i] == 0 and binary_sequence[i + 1] == 1:
-            demodulated_bits.append(1)  # Transição de 0 para 1
+            demodulated_bits.append(0)  # Transição de 0 para 1
         elif binary_sequence[i] == 1 and binary_sequence[i + 1] == 0:
-            demodulated_bits.append(0)  # Transição de 1 para 0
+            demodulated_bits.append(1)  # Transição de 1 para 0
 
     return demodulated_bits
 
