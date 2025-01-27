@@ -193,6 +193,7 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_out
     plt.grid(True)
     plt.legend()
     plt.savefig(f"modulacao_digital.png")
+    plt.close()  # Fecha a figura para liberar memória
 
        
     if analogical_modulation_selected == "ASK":
@@ -210,5 +211,6 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_out
     plt.ylabel("Amplitude")
     plt.grid(True)
     plt.savefig(f"modulacao_analogica.png")
-
+    plt.close()  # Fecha a figura para liberar memória
+    
     return signal2

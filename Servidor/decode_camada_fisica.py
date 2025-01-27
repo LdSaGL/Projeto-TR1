@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 def demodulate_ask(signal, A, F, digi_mod):
     """
@@ -148,6 +149,17 @@ def demodulate_bipolar(binary_sequence):
 
     return demodulated_bits
 
+def add_error(binary_sequence):
+    # Define a probabilidade de erro
+    error_probability = 0.01 
+
+    # Itera sobre a sequência binária e aplica a chance de inverter cada bit
+    for i in range(len(binary_sequence)):
+        if random.random() <= error_probability:
+            # Inverte o bit
+            binary_sequence[i] = 1 - binary_sequence[i]
+    return binary_sequence
+
 def main(digital_modulation_selected, analogical_modulation_selected, binary_input):
     """
     Função principal para decodificação da camada física.
@@ -155,6 +167,8 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_inp
     :param analogical_modulation_selected: Modulação analógica selecionada.
     :param binary_input: Sequência binária de entrada.
     """
+    binary_input = add_error(binary_input)
+    
     # Exibe o gráfico do sinal
     plt.figure(figsize=(12, 4))
     plt.plot(binary_input)
@@ -163,6 +177,7 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_inp
     plt.ylabel("Amplitude")
     plt.grid(True)
     plt.savefig(f"demodulacao_analogica.png")
+    plt.close()  # Fecha a figura para liberar memória
     
     # Demodulação analógica
     if analogical_modulation_selected == "ASK":
@@ -186,6 +201,7 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_inp
     plt.grid(True)
     plt.legend()
     plt.savefig(f"demodulacao_digital.png")
+    plt.close()  # Fecha a figura para liberar memória
     
     # Modulação digital
     if digital_modulation_selected == "NRZ-Polar":
