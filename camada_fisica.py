@@ -1,9 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def emulate_error():
-    return
-
 def nrz_polar_modulation(binary_sequence):
     """
     Função para modulação NRZ-Polar.
@@ -80,7 +77,7 @@ def ask_modulation(A, F, bit_stream, digi_mod):
     signal = np.zeros(sig_size * 100)  # Inicializa o array para o sinal modulado
     
     for i in range(sig_size):
-        if digi_mod == 3: # Se for bipolar
+        if digi_mod == "Bipolar": # Se for bipolar
             if bit_stream[i] in (1, -1): # Inclui a tensão -1 V como bit 1 
                 for j in range(100):
                     signal[(i * 100) + j] = A * np.sin(2 * np.pi * F * j / 100)
@@ -111,7 +108,7 @@ def fsk_modulation(A, F1, F2, bit_stream, digi_mod):
     signal = np.zeros(sig_size * 100)  # Inicializa o array para o sinal modulado
     
     for i in range(sig_size):
-        if digi_mod == 3: # Se for bipolar
+        if digi_mod == "Bipolar": # Se for bipolar
             if bit_stream[i] in (1, -1): # Inclui a tensão -1 V como bit 1 
                 for j in range(100):
                     signal[(i * 100) + j] = A * np.sin(2 * np.pi * F1 * j / 100)
@@ -172,7 +169,6 @@ def qam8_modulation(A, F, bit_stream):
     return signal
     
 def main(digital_modulation_selected, analogical_modulation_selected, binary_output):
-    
     binary_sequence = []
     for bit in binary_output:
         binary_sequence.append(int(bit))
@@ -196,8 +192,8 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_out
     plt.ylabel("Amplitude")
     plt.grid(True)
     plt.legend()
-    #plt.savefig(f"sinal_{modulation_name}.png")
-    plt.show()
+    plt.savefig(f"modulacao_digital.png")
+
        
     if analogical_modulation_selected == "ASK":
         signal2 = ask_modulation(1, 1, signal, digital_modulation_selected)
@@ -213,6 +209,6 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_out
     plt.xlabel("Amostras")
     plt.ylabel("Amplitude")
     plt.grid(True)
-    plt.show()
+    plt.savefig(f"modulacao_analogica.png")
 
     return signal2

@@ -1,5 +1,5 @@
 import numpy as np
-import camada_fisica as cf
+import matplotlib.pyplot as plt
 
 def demodulate_ask(signal, A, F, digi_mod):
     """
@@ -94,5 +94,105 @@ def demodulate_fsk(signal, A, F1, F2, digi_mod):
                     last_bit_one = 1
             else:
                 bit_stream.append(0)
+
+    return bit_stream
+
+def demodulate_nrz_polar(binary_sequence):
+    """
+    Demodula um sinal NRZ polar e reconstitui o bit stream original.
+    
+    :param binary_sequence: Lista ou array representando o stream de bits.
+    :return: Lista representando o stream de bits demodulado.
+    """
+    demodutaled_bits = []
+    for bit in binary_sequence:
+        if bit == 1:
+            demodutaled_bits.extend([1])
+        else:
+            demodutaled_bits.extend([0])
+    
+    return demodutaled_bits
+
+def demodulate_manchester(binary_sequence):
+    """
+    Função para demodulação Manchester.
+    :param signal: Sinal modulado em Manchester.
+    :return: Lista de bits demodulados e eixo do tempo correspondente.
+    """
+    demodulated_bits = []
+    
+    # Percorrer o sinal em pares de valores (cada bit é representado por dois valores)
+    for i in range(0, len(binary_sequence), 2):
+        # Detectar a transição no meio do bit
+        if binary_sequence[i] == 0 and binary_sequence[i + 1] == 1:
+            demodulated_bits.append(1)  # Transição de 0 para 1
+        elif binary_sequence[i] == 1 and binary_sequence[i + 1] == 0:
+            demodulated_bits.append(0)  # Transição de 1 para 0
+
+    return demodulated_bits
+
+def demodulate_bipolar(binary_sequence):
+    """
+    Função para demodulação bipolar.
+    :param signal: Sinal modulado em bipolar.
+    :return: Lista de bits demodulados e eixo do tempo correspondente.
+    """
+    demodulated_bits = []
+    
+    # Percorrer o sinal
+    for bit in binary_sequence:
+        if bit == 1 or bit == -1:
+            demodulated_bits.append(1)
+        else:
+            demodulated_bits.append(0)
+
+    return demodulated_bits
+
+def main(digital_modulation_selected, analogical_modulation_selected, binary_input):
+    """
+    Função principal para decodificação da camada física.
+    :param digital_modulation_selected: Modulação digital selecionada.
+    :param analogical_modulation_selected: Modulação analógica selecionada.
+    :param binary_input: Sequência binária de entrada.
+    """
+    # Exibe o gráfico do sinal
+    plt.figure(figsize=(12, 4))
+    plt.plot(binary_input)
+    plt.title(f"Sinal {analogical_modulation_selected} Modulado")
+    plt.xlabel("Amostras")
+    plt.ylabel("Amplitude")
+    plt.grid(True)
+    plt.savefig(f"demodulacao_analogica.png")
+    
+    # Demodulação analógica
+    if analogical_modulation_selected == "ASK":
+        signal = demodulate_ask(binary_input, 1, 1, digital_modulation_selected)
+    elif analogical_modulation_selected == "FSK":
+        signal = demodulate_fsk(binary_input, 1, 1, 3, digital_modulation_selected)
+    
+    # Geração do eixo do tempo
+    time = np.linspace(0, len(signal), len(signal), endpoint=False)
+    
+    # Correção do eixo x para plotagem
+    time_extended = np.append(time, time[-1] + (time[1] - time[0]))
+    signal_extended = np.append(signal, signal[-1])
+    
+    # Plotar o sinal digital modulado
+    plt.figure(figsize=(10, 4))
+    plt.plot(time_extended, signal_extended, drawstyle='steps-post', label="Sinal")
+    plt.title(f"Modulação {digital_modulation_selected}")
+    plt.xlabel("Tempo")
+    plt.ylabel("Amplitude")
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(f"demodulacao_digital.png")
+    
+    # Modulação digital
+    if digital_modulation_selected == "NRZ-Polar":
+        bit_stream = demodulate_nrz_polar(signal)
+    elif digital_modulation_selected == "Manchester":
+        bit_stream = demodulate_manchester(signal)
+    elif digital_modulation_selected == "Bipolar":
+        bit_stream = demodulate_bipolar(signal)
 
     return bit_stream

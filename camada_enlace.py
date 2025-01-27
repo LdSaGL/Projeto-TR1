@@ -134,9 +134,10 @@ def ascii_to_binary(ascii_input):
         binary_output += format(ord(char), "08b")
     return binary_output
 
-def main(framing, error_detection, ascii_input):
+def main(framing, error_detection, error_correction, ascii_input):
     
-    binary_sequence = [int(bit) for bit in ascii_input]
+    bin_ascii_input = ascii_to_binary(ascii_input)
+    binary_sequence = [int(bit) for bit in bin_ascii_input]
   
     # Verifica o tipo de enquadramento a ser utilizado
     if framing == "Contagem de Caracteres":
@@ -151,26 +152,9 @@ def main(framing, error_detection, ascii_input):
         binary_sequence = parity_bit(binary_sequence)
     elif error_detection == "CRC":
         binary_sequence = crc(binary_sequence)
-    elif error_detection == "Hamming":
+        
+    # Verifica o tipo de correção de erros a ser utilizada
+    if error_correction == "Hamming":
         binary_sequence = hamming(binary_sequence)
 
-    return binary_sequence
-
-import camada_fisica as cf
-import tx as tx
-
-if __name__ == "__main__":
-    framing = "Inserção de Bits"
-    error_detection = "Hamming"
-    ascii_input = "Me"
-    
-    # Converte a entrada ASCII para binário
-    ascii_input = ascii_to_binary(ascii_input)
-    
-    quadros = [ascii_input[i:i + 8] for i in range(0, len(ascii_input), 8)]
-    
-    # Chama a função main com os parâmetros apropriados
-    for j in quadros:
-        resultado = main(framing, error_detection, ascii_input)
-        quadro = cf.main("NRZ-Polar", "ASK", [str(bit) for bit in resultado])
-        tx.enviar_quadro_sync(quadro)
+    return binary_sequence, bin_ascii_input
