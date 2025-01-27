@@ -128,4 +128,5 @@ def main(framing, error_detection, error_correction, binary_sequence):
     elif framing == "Inserção de Bits":
         binary_sequence = decode_char_insertion(binary_sequence)
     
-    return text_from_bits(''.join(map(str,binary_sequence)))
+    x = ''.join(map(str,binary_sequence))
+    return text_from_bits(''.join(map(str,binary_sequence))), ' '.join(x[i:i+8] for i in range(0, len(x), 8))

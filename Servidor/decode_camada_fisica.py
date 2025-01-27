@@ -160,6 +160,67 @@ def add_error(binary_sequence):
             binary_sequence[i] = 1 - binary_sequence[i]
     return binary_sequence
 
+def ask_modulation(A, F, bit_stream, digi_mod):
+    """
+    Realiza modulação ASK (Amplitude Shift Keying) em um stream de bits.
+    :param A: Amplitude da onda portadora.
+    :param F: Frequência da onda portadora.
+    :param bit_stream: Lista ou array representando o stream de bits.
+    :param digi_mod: Tipo de modulação digital.
+    :return: Array representando o sinal modulado ASK.
+    """
+    sig_size = len(bit_stream)
+    signal = np.zeros(sig_size * 100)  # Inicializa o array para o sinal modulado
+    
+    for i in range(sig_size):
+        if digi_mod == "Bipolar": # Se for bipolar
+            if bit_stream[i] in (1, -1): # Inclui a tensão -1 V como bit 1 
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F * j / 100)
+            else:
+                for j in range(100):
+                    signal[(i * 100) + j] = 0
+        else:
+            if bit_stream[i] == 1:
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F * j / 100)
+            else:
+                for j in range(100):
+                    signal[(i * 100) + j] = 0
+
+    return signal
+
+def fsk_modulation(A, F1, F2, bit_stream, digi_mod):
+    """
+    Realiza modulação FSK (Frequency Shift Keying) em um stream de bits.
+    :param A: Amplitude da onda portadora.
+    :param F1: Frequência da onda portadora para o valor de tensão do bit 1.
+    :param F2: Frequência da onda portadora para o valor de tensão do bit 0.
+    :param bit_stream: Lista ou array representando o stream de bits.
+    :param digi_mod: Tipo de modulação digital.
+    :return: Array representando o sinal modulado FSK.
+    """
+    sig_size = len(bit_stream)
+    signal = np.zeros(sig_size * 100)  # Inicializa o array para o sinal modulado
+    
+    for i in range(sig_size):
+        if digi_mod == "Bipolar": # Se for bipolar
+            if bit_stream[i] in (1, -1): # Inclui a tensão -1 V como bit 1 
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F1 * j / 100)
+            else:
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F2 * j / 100)
+        else:
+            if bit_stream[i] == 1:
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F1 * j / 100)
+            else:
+                for j in range(100):
+                    signal[(i * 100) + j] = A * np.sin(2 * np.pi * F2 * j / 100)
+
+    return signal
+
 def main(digital_modulation_selected, analogical_modulation_selected, binary_input):
     """
     Função principal para decodificação da camada física.
@@ -169,21 +230,25 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_inp
     """
     binary_input = add_error(binary_input)
     
-    # Exibe o gráfico do sinal
+    # Demodulação analógica
+    if analogical_modulation_selected == "ASK":
+        signal = demodulate_ask(binary_input, 1, 1, digital_modulation_selected)
+        signal_to_plot = ask_modulation(1, 1, signal, digital_modulation_selected)
+    elif analogical_modulation_selected == "FSK":
+        signal = demodulate_fsk(binary_input, 1, 1, 3, digital_modulation_selected)
+        signal_to_plot = fsk_modulation(1, 1, 3, signal, digital_modulation_selected)
+    elif analogical_modulation_selected == "8-QAM":
+        pass
+    
+    # Plotar o sinal analógico demodulado
     plt.figure(figsize=(12, 4))
-    plt.plot(binary_input)
-    plt.title(f"Sinal {analogical_modulation_selected} Modulado")
+    plt.plot(signal_to_plot)
+    plt.title(f"Sinal {analogical_modulation_selected} Demodulado")
     plt.xlabel("Amostras")
     plt.ylabel("Amplitude")
     plt.grid(True)
     plt.savefig(f"demodulacao_analogica.png")
     plt.close()  # Fecha a figura para liberar memória
-    
-    # Demodulação analógica
-    if analogical_modulation_selected == "ASK":
-        signal = demodulate_ask(binary_input, 1, 1, digital_modulation_selected)
-    elif analogical_modulation_selected == "FSK":
-        signal = demodulate_fsk(binary_input, 1, 1, 3, digital_modulation_selected)
     
     # Geração do eixo do tempo
     time = np.linspace(0, len(signal), len(signal), endpoint=False)
@@ -192,10 +257,10 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_inp
     time_extended = np.append(time, time[-1] + (time[1] - time[0]))
     signal_extended = np.append(signal, signal[-1])
     
-    # Plotar o sinal digital modulado
+    # Plotar o sinal digital demodulado
     plt.figure(figsize=(10, 4))
     plt.plot(time_extended, signal_extended, drawstyle='steps-post', label="Sinal")
-    plt.title(f"Modulação {digital_modulation_selected}")
+    plt.title(f"Demodulação {digital_modulation_selected}")
     plt.xlabel("Tempo")
     plt.ylabel("Amplitude")
     plt.grid(True)
