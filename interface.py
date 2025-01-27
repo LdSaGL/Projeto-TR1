@@ -48,7 +48,7 @@ class ModulationApp(Gtk.Window):
         self.digital_mod_combo.append_text("Manchester")
         self.digital_mod_combo.append_text("Bipolar")
 
-        self.label_analog_mod = Gtk.Label(label="Modulação Analógica:")
+        self.label_analog_mod = Gtk.Label(label="Modulação Por Portadora:")
         self.analog_mod_combo = Gtk.ComboBoxText()
         self.analog_mod_combo.append_text("ASK")
         self.analog_mod_combo.append_text("FSK")

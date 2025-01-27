@@ -1,5 +1,6 @@
 import binascii
 
+# Função auxiliar importada dos questionários
 def text_to_bits(text, encoding='utf-8', errors='surrogatepass'):
     bits = bin(int(binascii.hexlify(text.encode(encoding, errors)), 16))[2:]
     return bits.zfill(8 * ((len(bits) + 7) // 8))
@@ -29,10 +30,12 @@ def byte_insertion(binary_sequence):
     flag =   [0,1,1,1,1,1,1,0]
     escape = [0,1,1,1,1,0,1,1]
     
+    # Verifica se a flag ou o escape estão presentes na sequência e adiciona o escape
     for i in range(len(binary_sequence)):
         if binary_sequence[i:i+8] == flag or binary_sequence[i:i+8] == escape:
             binary_sequence = binary_sequence[:i] + escape + binary_sequence[i:] 
-     
+    
+    # Adiciona a flag no início e no final da sequência
     return flag + binary_sequence + flag
 
 def char_insertion(binary_sequence):
@@ -47,12 +50,14 @@ def char_insertion(binary_sequence):
     
     framed_data = [bit for bit in flag]  # Adiciona o byte de flag inicial
     
-    char_insertion = [0,1,1,1,1,1,0,1,0]
+    char_insertion = [0,1,1,1,1,1,0,1,0] # Flag com a inserção de caractere
 
+    # Verifica se a flag está presente na sequência e trata com char_insertion
     for bit in range(len(binary_sequence)):
         if binary_sequence[bit:bit+8] == flag:
             binary_sequence = binary_sequence[:bit]+ char_insertion + binary_sequence[bit+8:]
     
+    # Adiciona os caracteres na sequência
     framed_data.extend(binary_sequence)
             
     # Adiciona o byte de flag final    
@@ -97,7 +102,7 @@ def crc(binary_sequence):
 
 def hamming(binary_sequence):
     """
-    Função para cálculo de código de Hamming.
+    Função para cálculo de código de Hamming. Nessa implementação, o código de Hamming é calculado para cada byte (8bits).
     :param binary_sequence: Lista de bits representando a sequência binária.
     :return: Lista de bits com código de Hamming.
     """
@@ -128,14 +133,27 @@ def hamming(binary_sequence):
     return [int(bit) for bit in hamming_sequence]
 
 def ascii_to_binary(ascii_input):
-    # Função que converte uma string ASCII para uma string binária
+    """
+    Função para converter uma string ASCII para uma sequência binária.
+    Lida com o input de dados do transmissor.
+    :param ascii_input: String ASCII a ser convertida.
+    :return: String binária representando a sequência ASCII.
+    """
     binary_output = ""
     for char in ascii_input:
         binary_output += format(ord(char), "08b")
     return binary_output
 
 def main(framing, error_detection, error_correction, ascii_input):
-    
+    """
+    Função principal para a camada de enlace.
+    :param framing: Tipo de enquadramento a ser utilizado.
+    :param error_detection: Tipo de detecção de erros a ser utilizada.
+    :param error_correction: Tipo de correção de erros a ser utilizada.
+    :param ascii_input: String ASCII a ser transmitida.
+    :return: Lista de bits representando a sequência binária e a string ASCII convertida para binário.
+    """
+    # Converte a string ASCII para binário e coloca em uma lista
     bin_ascii_input = ascii_to_binary(ascii_input)
     binary_sequence = [int(bit) for bit in bin_ascii_input]
   
@@ -157,4 +175,5 @@ def main(framing, error_detection, error_correction, ascii_input):
     if error_correction == "Hamming":
         binary_sequence = hamming(binary_sequence)
 
+    # O retorno de bin_ascii_input é necessário para mostrar na interface do transmissor
     return binary_sequence, bin_ascii_input

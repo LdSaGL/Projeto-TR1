@@ -5,7 +5,6 @@ import random
 def demodulate_ask(signal, A, F, digi_mod):
     """
     Demodula um sinal ASK e reconstitui o bit stream original.
-    
     :param signal: Array representando o sinal modulado ASK.
     :param A: Amplitude da onda portadora.
     :param F: Frequência da onda portadora.
@@ -30,9 +29,9 @@ def demodulate_ask(signal, A, F, digi_mod):
             elif avg_amplitude < A / 4:  # Limite para ausência de onda
                 bit_stream.append(-1)
         elif digi_mod == "Manchester":
-            if avg_amplitude > A / 2:  # Limite para considerar presença de onda
+            if avg_amplitude > A / 2:
                 bit_stream.append(1)
-            elif avg_amplitude < A / 4:  # Limite para ausência de onda
+            elif avg_amplitude < A / 4:
                 bit_stream.append(0)
         elif digi_mod == "Bipolar":
             if avg_amplitude > A / 2:
@@ -50,7 +49,6 @@ def demodulate_ask(signal, A, F, digi_mod):
 def demodulate_fsk(signal, A, F1, F2, digi_mod):
     """
     Demodula um sinal FSK e reconstitui o bit stream original.
-    
     :param signal: Array representando o sinal modulado FSK.
     :param A: Amplitude da onda portadora.
     :param F1: Frequência da onda portadora para o valor de tensão do bit 1.
@@ -81,9 +79,9 @@ def demodulate_fsk(signal, A, F1, F2, digi_mod):
             else:  # Limite para ausência de onda
                 bit_stream.append(-1)
         elif digi_mod == "Manchester":
-            if energy_f1 > energy_f2:  # Limite para considerar presença de onda
+            if energy_f1 > energy_f2:
                 bit_stream.append(1)
-            else:  # Limite para ausência de onda
+            else:
                 bit_stream.append(0)
         elif digi_mod == "Bipolar":
             if energy_f1 > energy_f2:
@@ -101,10 +99,10 @@ def demodulate_fsk(signal, A, F1, F2, digi_mod):
 def demodulate_nrz_polar(binary_sequence):
     """
     Demodula um sinal NRZ polar e reconstitui o bit stream original.
-    
     :param binary_sequence: Lista ou array representando o stream de bits.
     :return: Lista representando o stream de bits demodulado.
     """
+    # Percorrer o sinal e converter as tensões em bits
     demodutaled_bits = []
     for bit in binary_sequence:
         if bit == 1:
@@ -140,7 +138,7 @@ def demodulate_bipolar(binary_sequence):
     """
     demodulated_bits = []
     
-    # Percorrer o sinal
+    # Percorrer o sinal e converter as tensões em bits
     for bit in binary_sequence:
         if bit == 1 or bit == -1:
             demodulated_bits.append(1)
@@ -150,6 +148,9 @@ def demodulate_bipolar(binary_sequence):
     return demodulated_bits
 
 def add_error(binary_sequence):
+    """
+    Função para emular erros de transmissão à sequência binária.	
+    """
     # Define a probabilidade de erro
     error_probability = 0.01 
 
@@ -227,10 +228,14 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_inp
     :param digital_modulation_selected: Modulação digital selecionada.
     :param analogical_modulation_selected: Modulação analógica selecionada.
     :param binary_input: Sequência binária de entrada.
+    :return: Sequência de bits demodulada.
     """
+    # Adicionar erro à sequência binária
     binary_input = add_error(binary_input)
     
     # Demodulação analógica
+    # As funções de modulação foram replicadas do arquivo camada_fisica.py para evitar qualquer dependência entre transmissor e receptor
+    # Elas foram úteis para montar novamente o gráfico do sinal exibido na interface
     if analogical_modulation_selected == "ASK":
         signal = demodulate_ask(binary_input, 1, 1, digital_modulation_selected)
         signal_to_plot = ask_modulation(1, 1, signal, digital_modulation_selected)
