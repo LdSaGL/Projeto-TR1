@@ -93,10 +93,8 @@ async def websocket_server(interface):
             error_detection = data.get("error_detection")
             error_correction = data.get("error_correction")
 
-            # Realiza a demodulação
+            # Realiza a demodulação e decodificação de sinais
             demodulated_frame = dcf.main(digital_modulation, analogical_modulation, quadro_array)
-
-            # Realiza a decodificação de enlace
             final_message, final_message_bin = dce.main(framing, error_detection, error_correction, demodulated_frame)
 
             # Atualiza a interface pelo GLib

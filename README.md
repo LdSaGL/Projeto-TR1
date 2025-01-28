@@ -3,3 +3,5 @@ Projeto desenvolvido durante a disciplina de Teleinformática e Redes 1 no segun
 
 Simular o funcionamento da camada de enlace e camada física por meio da implementação dos pro
 tocolos de enquadramento, modulação banda-base e modulação por portadora.
+
+Senha Jupyter: projeto

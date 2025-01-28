@@ -94,6 +94,12 @@ def decode_char_insertion(binary_sequence):
     flag = [0,1,1,1,1,1,1,0]
     trimmed_sequence = binary_sequence[8:-8]
     
+    # Verifica se as flags de início e fim recebidas batem com a flag
+    flag_inicial = binary_sequence[:8]
+    flag_final = binary_sequence[-8:]
+    if flag_inicial != flag or flag_final != flag:
+        raise Exception("Erro de transmissão detectado - Inserção de Caracteres")
+    
     flag_inserted_char = [0,1,1,1,1,1,0,1,0]
     for bit in range(len(trimmed_sequence)):
         if trimmed_sequence[bit:bit+9] == flag_inserted_char:

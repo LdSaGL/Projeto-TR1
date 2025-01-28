@@ -165,6 +165,18 @@ unicode = ["unicodedata2 (>=15.1.0)"]
 woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
+name = "jupyterlab-markup"
+version = "2.1.0a1"
+description = "Extensible markdown rendering support in markdown"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "jupyterlab_markup-2.1.0a1-py3-none-any.whl", hash = "sha256:4475432c1db08a4035af2439131c786ec962ac366f3856b5acd2598f52d3092a"},
+    {file = "jupyterlab_markup-2.1.0a1.tar.gz", hash = "sha256:e25a2fb25dbd59b6af1e957f0e01cc8f4f7a511d64dad60fdfc128e0701e673f"},
+]
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.8"
 description = "A fast implementation of the Cassowary constraint solver"
@@ -637,4 +649,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <4.0"
-content-hash = "7c8651fcc870be2349754ce1db1a4b74d26afa9884f56ac02953db86f87f5c34"
+content-hash = "15d3784b4399d6f2b22a1ff294fdf034a1bbc316591959d6c64302f6d9586195"
