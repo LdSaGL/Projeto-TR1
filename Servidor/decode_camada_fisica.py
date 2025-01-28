@@ -96,6 +96,7 @@ def demodulate_fsk(signal, A, F1, F2, digi_mod):
 
     return bit_stream
 
+
 def demodulate_nrz_polar(binary_sequence):
     """
     Demodula um sinal NRZ polar e reconstitui o bit stream original.
@@ -244,6 +245,7 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_inp
         signal_to_plot = fsk_modulation(1, 1, 3, signal, digital_modulation_selected)
     elif analogical_modulation_selected == "8-QAM":
         pass
+
     
     # Plotar o sinal analógico demodulado
     plt.figure(figsize=(12, 4))

@@ -125,7 +125,7 @@ def fsk_modulation(A, F1, F2, bit_stream, digi_mod):
 
     return signal
 
-def qam8_modulation(A, F, bit_stream):
+def qam8_modulation(A, F, bit_stream, digi_mod):
     """
     Realiza modulação 8-QAM (Quadrature Amplitude Modulation com 8 estados) em um stream de bits.
     :param A: Amplitude base da onda portadora.
@@ -133,8 +133,18 @@ def qam8_modulation(A, F, bit_stream):
     :param bit_stream: Lista ou array representando o stream de bits (deve ter múltiplos de 3).
     :return: Array representando o sinal modulado 8-QAM.
     """
-    if len(bit_stream) % 3 != 0:
-        raise ValueError("O bit_stream deve ter tamanho múltiplo de 3 para 8-QAM.")
+    # Modificações para satisfazer a constelação 8-QAM
+    bit_zero=0
+    if digi_mod == "NRZ-Polar": # Se for bipolar
+        bit_zero = -1
+    elif digi_mod == "Bipolar":
+        for i in range(len(bit_stream)):
+            if bit_stream[i] == -1:
+                bit_stream[i] = 1
+    
+    # Adiciona zeros ao bit_stream até que seu comprimento seja múltiplo de 3
+    while len(bit_stream) % 3 != 0:
+        bit_stream.append(bit_zero)
 
     sig_size = len(bit_stream) // 3  # Cada símbolo 8-QAM representa 3 bits
     signal = np.zeros(sig_size * 100)  # Inicializa o array para o sinal modulado
@@ -142,13 +152,13 @@ def qam8_modulation(A, F, bit_stream):
     
     # Constelação 8-QAM (amplitude e fase para cada combinação de bits)
     constellation = {
-        (0, 0, 0): (A / 2, 0),
-        (0, 0, 1): (A / 2, np.pi / 4),
-        (0, 1, 0): (A / 2, np.pi / 2),
-        (0, 1, 1): (A / 2, 3 * np.pi / 4),
-        (1, 0, 0): (A, 0),
-        (1, 0, 1): (A, np.pi / 4),
-        (1, 1, 0): (A, np.pi / 2),
+        (bit_zero, bit_zero, bit_zero): (A / 2, 0),
+        (bit_zero, bit_zero, 1): (A / 2, np.pi / 4),
+        (bit_zero, 1, bit_zero): (A / 2, np.pi / 2),
+        (bit_zero, 1, 1): (A / 2, 3 * np.pi / 4),
+        (1, bit_zero,bit_zero): (A, 0),
+        (1, bit_zero, 1): (A, np.pi / 4),
+        (1, 1, bit_zero): (A, np.pi / 2),
         (1, 1, 1): (A, 3 * np.pi / 4),
     }
 
@@ -209,7 +219,7 @@ def main(digital_modulation_selected, analogical_modulation_selected, binary_out
     elif analogical_modulation_selected == "FSK":
         signal2 = fsk_modulation(1, 1, 3, signal, digital_modulation_selected)
     elif analogical_modulation_selected == "8-QAM":
-        signal2 = qam8_modulation(1, 1, signal)
+        signal2 = qam8_modulation(1, 1, signal, digital_modulation_selected)
     
     # Plotar o sinal analógico modulado
     plt.figure(figsize=(12, 4))
